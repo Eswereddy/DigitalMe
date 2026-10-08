@@ -307,6 +307,12 @@ app.get('/export', auth, wrap(async (req, res) => {
     projects: await q('projects'), tasks: await q('tasks'), learning: await q('learn_progress'), presentations: await q('pres_sessions') });
 }));
 app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), 'public')));
+app.get('/', (req, res) => {                                   // fallback + diagnostics if public/index.html is missing
+  const base = path.dirname(fileURLToPath(import.meta.url));
+  for (const f of ['public/index.html', 'index.html', 'digital-me-pro.html']) if (fs.existsSync(path.join(base, f))) return res.sendFile(path.join(base, f));
+  const ls = d => fs.existsSync(d) ? fs.readdirSync(d).filter(n => n !== 'node_modules').join(', ') : '(missing)';
+  res.status(404).type('text').send(`Digital Me API is running, but the web page was not found.\nFiles next to server.js: ${ls(base)}\nFiles in public/: ${ls(path.join(base, 'public'))}\nAdd public/index.html to your repo.`);
+});
 await db.query(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'schema.sql'), 'utf8')); // auto-migrate
 
 // ---------- v4: public Digital Me link, document generator, daily plan, rehearsal gaps ----------
