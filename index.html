@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Me</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fffc;--tx:#0f172a;--mu:#64748b;--ac:#6366f1;--ac2:#06b6d4;--bd:#e2e8f0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--card:#151b30cc;--tx:#e8ecf8;--mu:#94a3b8;--bd:#263050}}
+:root[data-theme="dark"]{--bg:#0b1020;--card:#151b30cc;--tx:#e8ecf8;--mu:#94a3b8;--bd:#263050}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;background-image:radial-gradient(60% 40% at 80% 0,#6366f133,transparent),radial-gradient(50% 40% at 0 100%,#06b6d433,transparent);min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--bd);position:sticky;top:env(safe-area-inset-top,0px);backdrop-filter:blur(12px);background:var(--card);z-index:5;flex-wrap:wrap}
+.logo{font-weight:700;font-size:18px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;color:transparent}
+.sp{flex:1}.dot{color:#22c55e;font-size:13px}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:7px 12px;transition:.15s}
+button:hover{border-color:var(--ac);transform:translateY(-1px)}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+main{max-width:1150px;margin:auto;padding:20px}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px;backdrop-filter:blur(10px)}
+.mode{cursor:pointer;min-height:170px;transition:.2s}.mode:hover{transform:translateY(-3px);border-color:var(--ac)}.mode h2{margin:6px 0}.mu{color:var(--mu);font-size:13px}
+.stat b{font-size:26px;display:block}
+.view{display:none}.view.on{display:block}
+.pres{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px}@media(max-width:900px){.pres{grid-template-columns:1fr}}
+.slide{min-height:220px;white-space:pre-wrap}.slide h3{margin-top:0}
+.avatar{width:120px;height:120px;border-radius:50%;margin:8px auto;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center;font-size:48px;animation:idle 3s ease-in-out infinite}
+.avatar.talk{animation:talk .4s ease-in-out infinite alternate}
+@keyframes idle{50%{transform:scale(1.03)}}@keyframes talk{to{transform:scale(1.08);box-shadow:0 0 30px var(--ac2)}}
+.bar{height:6px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac);width:0;transition:.3s}
+input,textarea,select{font:inherit;width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--tx)}textarea{min-height:110px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.row>input{flex:1;min-width:140px}
+.msg{padding:8px 12px;border-radius:12px;margin:6px 0;max-width:90%;white-space:pre-wrap}.u{background:var(--ac);color:#fff;margin-left:auto}.a{background:var(--bd)}
+#chat{height:300px;overflow:auto}
+.qa{border-left:3px solid var(--ac2);padding-left:10px;margin:8px 0;font-size:13px}
+li.t{display:flex;gap:8px;align-items:center;margin:4px 0;list-style:none}.pr-H{color:#ef4444}.pr-M{color:#f59e0b}.pr-L{color:#22c55e}
+</style></head><body>
+<header><span class="logo">Digital Me</span><span class="dot">🟢 Online</span><span class="mu" id="modeLbl">Dashboard</span><span class="sp"></span>
+<button onclick="show('home')">Dashboard</button><button onclick="show('pres')">🎤 Presentation</button><button onclick="show('comp')">🤝 Companion</button><button onclick="show('kb')">Knowledge</button><button id="th">◐</button></header>
+<div id="lg" style="position:fixed;inset:0;background:var(--bg);z-index:20;display:grid;place-items:center"><div class="card" style="width:min(380px,92vw)"><h2 class="logo" style="margin-top:0">Digital Me</h2>
+<input id="lapi" placeholder="API URL"><div class="row"><input id="lem" placeholder="Email" type="email"></div><div class="row"><input id="lnm" placeholder="Name (register only)"></div><div class="row"><input id="lpw" type="password" placeholder="Password (8+ chars)"></div>
+<div class="row"><button class="p" onclick="doAuth('login')">Log in</button><button onclick="doAuth('register')">Register</button></div><div class="mu" id="lerr"></div></div></div><main>
+<section class="view on" id="home">
+<h1 style="margin:0 0 4px">Your AI doesn't just talk to you. It can represent you.</h1><p class="mu">Both modes share one identity and one knowledge base. Nothing is invented: answers come only from what you store.</p>
+<div class="grid g2"><div class="card mode" onclick="show('pres')"><div style="font-size:34px">🎤</div><h2>Presentation Mode</h2><div class="mu">Let Digital Me represent you: projects, resume, startup, research, portfolio.</div></div>
+<div class="card mode" onclick="show('comp')"><div style="font-size:34px">🤝</div><h2>Companion Mode</h2><div class="mu">Let Digital Me assist you: learning, planning, tasks, interviews, project help.</div></div></div>
+<div class="grid g4" style="margin-top:16px"><div class="card stat"><b id="sK">0</b><span class="mu">Knowledge items</span></div><div class="card stat"><b id="sS">0</b><span class="mu">Slides</span></div><div class="card stat"><b id="sT">0</b><span class="mu">Open tasks</span></div><div class="card stat"><b id="sD">0</b><span class="mu">Tasks done</span></div></div>
+</section>
+
+<section class="view" id="pres">
+<div class="pres">
+<div class="card"><div class="mu">Slides</div><div class="slide" id="slide"></div><div class="bar"><i id="prog"></i></div><div class="row"><button onclick="nav(-1)">◀ Prev</button><button class="p" onclick="startP()">▶ Start</button><button onclick="togglePause()">⏯ Pause/Resume</button><button onclick="nav(1)">Next ▶</button><button onclick="speak(cur(),1)">Repeat</button><button onclick="speak(simple(cur()),1)">Explain simply</button><button onclick="endP()">End</button></div></div>
+<div class="card" style="text-align:center"><div class="avatar" id="av">🙂</div><b id="who">Digital Me</b><div class="mu" id="topic">Topic: -</div><div class="mu">Timer <b id="tm">00:00</b> · Slides done <b id="sd">0</b> · Questions <b id="qn">0</b></div>
+<div class="row" style="justify-content:center"><label class="mu">Speed <input type="range" id="rate" min=".6" max="1.4" step=".1" value="1" style="width:90px"></label><label class="mu"><input type="checkbox" id="voice" checked style="width:auto"> Voice</label></div></div>
+<div class="card"><b>Audience Q&A</b><div class="row"><input id="q" placeholder="Ask the audience question..."><button class="p" onclick="ask()">Ask</button></div><div id="qa"></div></div>
+</div>
+<div class="card" style="margin-top:14px"><b>Presentation material</b> <span class="mu">(separate slides with a blank line; first line is the title)</span><textarea id="deck"></textarea><div class="row"><input type="file" id="file" accept=".txt,.md"><button onclick="loadDeck()">Load slides</button></div><div class="mu">PDF/PPTX/OCR ingestion needs a backend; this prototype accepts text and Markdown.</div></div>
+</section>
+
+<section class="view" id="comp"><div class="grid g2">
+<div class="card"><b>AI Chat</b><div id="chat"></div><div class="row"><input id="cin" placeholder="Try: what should I work on today?" onkeydown="if(event.key==='Enter')chat()"><button class="p" onclick="chat()">Send</button></div></div>
+<div class="card"><b>Tasks</b><div class="row"><input id="tt" placeholder="New task"><select id="tp" style="width:auto"><option>H</option><option selected>M</option><option>L</option></select><input id="td" type="date" style="width:auto"><button onclick="addT()">Add</button></div><ul id="tl" style="padding:0"></ul></div></div></section>
+
+<section class="view" id="kb"><div class="card"><b>Digital Identity & Knowledge Base</b><p class="mu">Stored only in this browser. Delete anything at any time.</p>
+<div class="row"><input id="kc" list="cats" placeholder="Category (Personal, Professional, Project, Learning, Preferences)"><datalist id="cats"><option>Personal</option><option>Professional</option><option>Project</option><option>Learning</option><option>Preferences</option></datalist><input id="kt" placeholder="Title"></div><textarea id="kx" placeholder="Fact or note, in your own words"></textarea><div class="row"><button class="p" onclick="addK()">Save item</button><button onclick="if(confirm('Delete all knowledge?')){KB=[];save();renderK()}">Delete all</button></div><div id="kl"></div></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v||d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let KB=ld('dm_kb',[{c:'Project',t:'AgriConnect AI',x:'AgriConnect AI is an AI-powered agricultural platform designed to help farmers access verified buyers, market intelligence and agricultural services. It is a farmer-buyer marketplace with farmer and buyer profiles, matching, negotiation, order, payment and delivery flow.'},{c:'Personal',t:'Name',x:'My name is Eswar Reddy.'}]);
+let TASKS=ld('dm_tasks',[]);let SL=ld('dm_slides',null),i=0,sec=0,timer=null,paused=false,done=new Set(),qn=0;
+if(!SL)SL=[{t:'AgriConnect AI',x:'An AI-powered agricultural platform designed to help farmers access verified buyers, market intelligence and agricultural services.'},{t:'Profiles',x:'Farmer and buyer profiles form the base of the marketplace.'},{t:'Matching and negotiation',x:'Farmers are matched with buyers, who can then negotiate.'},{t:'Order, payment and delivery',x:'After negotiation the flow continues through order, payment and delivery.'}];
+function save(){sv('dm_kb',KB);sv('dm_tasks',TASKS);sv('dm_slides',SL)}
+function show(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id===v));$('modeLbl').textContent={home:'Dashboard',pres:'Presentation Mode',comp:'Companion Mode',kb:'Knowledge'}[v];stats()}
+function stats(){$('sK').textContent=KB.length;$('sS').textContent=SL.length;$('sT').textContent=TASKS.filter(t=>!t.d).length;$('sD').textContent=TASKS.filter(t=>t.d).length}
+const SW=new Set('the a an is of to and in for on what how do does it my me i you your are with this that about can'.split(' '));
+const tok=s=>(s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(w=>w.length>2&&!SW.has(w));
+function retrieve(q){const qt=new Set(tok(q));if(!qt.size)return null;let best=null;
+ const pool=[...KB.map(k=>({src:'Knowledge: '+k.t,txt:k.x})),...SL.map((s,n)=>({src:'Slide '+(n+1)+': '+s.t,txt:s.t+'. '+s.x}))];
+ pool.forEach(p=>{const pt=new Set(tok(p.txt));let h=0;qt.forEach(w=>{if(pt.has(w))h++});const sc=h/qt.size;if(h&&(!best||sc>best.sc))best={...p,sc}});return best}
+function simple(t){return t.split('. ')[0]+'.'}
+function cur(){return SL[i]?SL[i].t+'. '+SL[i].x:''}
+function speak(t,force){const av=$('av');av.textContent='😀';if(!$('voice').checked||!window.speechSynthesis){setTimeout(()=>av.textContent='🙂',1500);return}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=+$('rate').value;u.onstart=()=>av.classList.add('talk');u.onend=u.onerror=()=>{av.classList.remove('talk');av.textContent='🙂'};speechSynthesis.speak(u)}catch(e){}}
+function render(){const s=SL[i];$('slide').innerHTML=s?'<h3>'+esc(s.t)+'</h3>'+esc(s.x):'No slides loaded.';$('topic').textContent='Topic: '+(s?s.t:'-');$('prog').style.width=SL.length?((i+1)/SL.length*100)+'%':'0';$('sd').textContent=done.size;$('qn').textContent=qn;$('who').textContent='Digital Me'+(KB.find(k=>k.t==='Name')?' · representing '+KB.find(k=>k.t==='Name').x.replace(/^my name is /i,'').replace(/\.$/,''):'')}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function nav(d){i=Math.max(0,Math.min(SL.length-1,i+d));done.add(i);render();if(timer&&!paused)speak(cur())}
+function startP(){i=0;done=new Set([0]);sec=0;qn=0;paused=false;clearInterval(timer);timer=setInterval(()=>{if(!paused){sec++;$('tm').textContent=String(sec/60|0).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}},1000);render();const n=KB.find(k=>k.t==='Name');speak('Hello everyone. I am Digital Me'+(n?', representing '+n.x.replace(/^my name is /i,'').replace(/\.$/,''):'')+'. '+cur())}
+function togglePause(){paused=!paused;if(window.speechSynthesis){try{paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}}}
+function endP(){clearInterval(timer);timer=null;try{speechSynthesis.cancel()}catch(e){}$('av').classList.remove('talk');alert('Presentation ended. Duration '+$('tm').textContent+', slides completed '+done.size+', questions answered '+qn+'.')}
+function answer(q){const r=retrieve(q);if(!r)return{a:"I don't have that information in my Digital Me knowledge base.",c:'None',s:'-'};const c=r.sc>=.6?'High':r.sc>=.3?'Medium':'Low';return{a:r.txt,c,s:r.src}}
+function ask(){const q=$('q').value.trim();if(!q)return;const r=retrieve(q);const o=r?{a:r.txt,c:r.sc>=.6?'High':r.sc>=.3?'Medium':'Low',s:r.src}:{a:"This information isn't available in my current project knowledge base.",c:'None',s:'-'};qn++;$('qa').insertAdjacentHTML('afterbegin','<div class="qa"><b>Audience:</b> '+esc(q)+'<br><b>Digital Me:</b> '+esc(o.a)+'<br><span class="mu">Confidence: '+o.c+' · Source: '+esc(o.s)+'</span></div>');$('q').value='';render();speak(o.a)}
+function loadDeck(){const t=$('deck').value.trim();if(!t)return;SL=t.split(/\n\s*\n/).map(b=>{const l=b.trim().split('\n');return{t:l[0],x:l.slice(1).join('\n')}});i=0;save();render();stats()}
+$('file').onchange=e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=()=>{$('deck').value=r.result};r.readAsText(f)}};
+function addMsg(c,t){$('chat').insertAdjacentHTML('beforeend','<div class="msg '+c+'">'+esc(t)+'</div>');$('chat').scrollTop=1e9}
+function chat(){const q=$('cin').value.trim();if(!q)return;$('cin').value='';addMsg('u',q);
+ if(/today|work on|complete/i.test(q)){const o=TASKS.filter(t=>!t.d).sort(prio);addMsg('a',o.length?'Suggested order (priority, then deadline):\n'+o.map((t,n)=>(n+1)+'. '+t.t+' ['+t.p+(t.dl?', due '+t.dl:'')+']').join('\n'):'You have no open tasks. Add some on the right.');return}
+ const r=answer(q);addMsg('a',r.a+(r.s!=='-'?'\n\n(From your knowledge base · '+r.s+')':'\n\nFor general explanations, study plans or coding help, this prototype needs an LLM backend connected.'))}
+const po={H:0,M:1,L:2};function prio(a,b){return po[a.p]-po[b.p]||(a.dl||'9').localeCompare(b.dl||'9')}
+function addT(){const t=$('tt').value.trim();if(!t)return;TASKS.push({t,p:$('tp').value,dl:$('td').value,d:false});$('tt').value='';save();renderT();stats()}
+function renderT(){$('tl').innerHTML=TASKS.map((t,n)=>'<li class="t"><input type="checkbox" style="width:auto" '+(t.d?'checked':'')+' onchange="TASKS['+n+'].d=this.checked;save();renderT();stats()"><span class="pr-'+t.p+'">●</span><span style="flex:1;'+(t.d?'text-decoration:line-through':'')+'">'+esc(t.t)+' <span class="mu">'+esc(t.dl)+'</span></span><button onclick="TASKS.splice('+n+',1);save();renderT();stats()">✕</button></li>').join('')}
+function addK(){const t=$('kt').value.trim(),x=$('kx').value.trim();if(!t||!x)return;KB.push({c:$('kc').value||'Personal',t,x});$('kt').value=$('kx').value='';save();renderK();stats()}
+function renderK(){$('kl').innerHTML=KB.map((k,n)=>'<div class="qa"><b>'+esc(k.t)+'</b> <span class="mu">'+esc(k.c)+'</span> <button onclick="KB.splice('+n+',1);save();renderK();stats()">Delete</button><br>'+esc(k.x)+'</div>').join('')}
+$('th').onclick=()=>{const d=document.documentElement;const dark=d.dataset.theme?d.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;d.dataset.theme=dark?'light':'dark'};
+$('deck').value=SL.map(s=>s.t+'\n'+s.x).join('\n\n');render();renderT();renderK();stats();
+</script><script>
+/* ---- Backend-connected overrides ---- */
+let API=ld('dm_api',location.protocol.startsWith('http')?location.origin:'http://localhost:4000'),TOKEN=ld('dm_tok',''),NAME=ld('dm_name',''),HIST=[];
+$('lapi').value=API;
+function save(){sv('dm_slides',SL)}
+async function api(p,o={}){const h={};if(TOKEN)h.authorization='Bearer '+TOKEN;let b=o.body;if(o.json){h['content-type']='application/json';b=JSON.stringify(o.json)}
+ const r=await fetch(API.replace(/\/$/,'')+p,{method:o.method||'GET',headers:h,body:b});const d=await r.json().catch(()=>({}));
+ if(r.status===401&&TOKEN){logout();throw new Error('Session expired, log in again')}if(!r.ok)throw new Error(d.error||'Request failed ('+r.status+')');return d}
+async function doAuth(k){API=$('lapi').value.trim();sv('dm_api',API);try{const d=await api('/auth/'+k,{method:'POST',json:{email:$('lem').value,name:$('lnm').value,password:$('lpw').value}});
+ TOKEN=d.token;NAME=d.name;sv('dm_tok',TOKEN);sv('dm_name',NAME);$('lg').style.display='none';boot()}catch(e){$('lerr').textContent=e.message}}
+function logout(){TOKEN='';sv('dm_tok','');$('lg').style.display='grid'}
+async function loadK(){KB=(await api('/knowledge')).map(d=>({id:d.id,c:d.category,t:d.title,x:''}));renderK();stats()}
+async function loadT(){TASKS=(await api('/tasks')).map(t=>({id:t.id,t:t.title,p:t.priority.trim(),dl:(t.deadline||'').slice(0,10),d:t.done}));renderT();stats()}
+async function boot(){try{await Promise.all([loadK(),loadT()])}catch(e){alert(e.message)}render()}
+function render(){const s=SL[i];$('slide').innerHTML=s?'<h3>'+esc(s.t)+'</h3>'+esc(s.x):'No slides loaded.';$('topic').textContent='Topic: '+(s?s.t:'-');$('prog').style.width=SL.length?((i+1)/SL.length*100)+'%':'0';$('sd').textContent=done.size;$('qn').textContent=qn;$('who').textContent='Digital Me'+(NAME?' · representing '+NAME:'')}
+function startP(){i=0;done=new Set([0]);sec=0;qn=0;paused=false;clearInterval(timer);timer=setInterval(()=>{if(!paused){sec++;$('tm').textContent=String(sec/60|0).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}},1000);render();speak('Hello everyone. I am Digital Me'+(NAME?', representing '+NAME:'')+'. '+cur())}
+async function ask(){const q=$('q').value.trim();if(!q)return;$('q').value='';let o;try{const d=await api('/presentation/qa',{method:'POST',json:{question:q}});o={a:d.answer,c:d.confidence,s:(d.sources||[]).join(', ')||'-'}}catch(e){o={a:'Error: '+e.message,c:'-',s:'-'}}
+ qn++;$('qa').insertAdjacentHTML('afterbegin','<div class="qa"><b>Audience:</b> '+esc(q)+'<br><b>Digital Me:</b> '+esc(o.a)+'<br><span class="mu">Confidence: '+o.c+' · Source: '+esc(o.s)+'</span></div>');render();speak(o.a)}
+async function chat(){const q=$('cin').value.trim();if(!q)return;$('cin').value='';addMsg('u',q);try{const d=await api('/chat',{method:'POST',json:{message:q,history:HIST}});
+ addMsg('a',d.answer+(d.sources&&d.sources.length?'\n\n(From your knowledge base: '+d.sources.join(', ')+')':''));HIST.push({role:'user',content:q},{role:'assistant',content:d.answer})}catch(e){addMsg('a','Error: '+e.message)}}
+async function addK(){const t=$('kt').value.trim(),x=$('kx').value.trim(),f=$('kf').files[0];if(!f&&(!t||!x))return;try{const fd=new FormData();fd.append('title',t||(f&&f.name)||'');fd.append('category',$('kc').value||'Personal');if(f)fd.append('file',f);else fd.append('text',x);
+ await api('/knowledge',{method:'POST',body:fd});$('kt').value=$('kx').value=$('kf').value='';await loadK()}catch(e){alert(e.message)}}
+function renderK(){$('kl').innerHTML=KB.map(k=>'<div class="qa"><b>'+esc(k.t)+'</b> <span class="mu">'+esc(k.c)+'</span> <button onclick="delK('+k.id+')">Delete</button></div>').join('')}
+async function delK(id){await api('/knowledge/'+id,{method:'DELETE'});loadK()}
+async function delAll(){if(confirm('Delete all stored knowledge?')){await api('/me/data',{method:'DELETE'});loadK()}}
+async function loadDeck(){const t=$('deck').value.trim();if(!t)return;SL=t.split(/\n\s*\n/).map(b=>{const l=b.trim().split('\n');return{t:l[0],x:l.slice(1).join('\n')}});i=0;save();render();stats();
+ try{const fd=new FormData();fd.append('title','Presentation: '+SL[0].t);fd.append('category','Project');fd.append('text',t);await api('/knowledge',{method:'POST',body:fd});loadK()}catch(e){alert(e.message)}}
+async function addT(){const t=$('tt').value.trim();if(!t)return;await api('/tasks',{method:'POST',json:{title:t,priority:$('tp').value,deadline:$('td').value||null}});$('tt').value='';loadT()}
+function renderT(){$('tl').innerHTML=TASKS.map(t=>'<li class="t"><input type="checkbox" style="width:auto" '+(t.d?'checked':'')+' onchange="togT('+t.id+',this.checked)"><span class="pr-'+t.p+'">●</span><span style="flex:1;'+(t.d?'text-decoration:line-through':'')+'">'+esc(t.t)+' <span class="mu">'+esc(t.dl)+'</span></span><button onclick="delT('+t.id+')">✕</button></li>').join('')}
+async function togT(id,d){await api('/tasks/'+id,{method:'PATCH',json:{done:d}});loadT()}
+async function delT(id){await api('/tasks/'+id,{method:'DELETE'});loadT()}
+document.querySelectorAll('#kb button').forEach(b=>{if(b.textContent==='Delete all')b.onclick=delAll});
+$('kx').insertAdjacentHTML('afterend','<div class="row"><input type="file" id="kf" accept=".pdf,.docx,.pptx,.txt,.md"></div>');
+$('cin').placeholder='Ask Digital Me anything';
+if(TOKEN){$('lg').style.display='none';boot()}
+
+/* ---- v2 features ---- */
+const MAIN=document.querySelector('main'),mk=(id,h)=>MAIN.insertAdjacentHTML('beforeend','<section class="view" id="'+id+'">'+h+'</section>');
+const LBL={home:'Dashboard',pres:'Presentation Mode',comp:'Companion Mode',kb:'Knowledge',prof:'Digital Identity',learn:'Learning',intv:'Interview Prep',proj:'Projects',ins:'Insights'};
+function show(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id===v));$('modeLbl').textContent=LBL[v]||'';stats();if(!TOKEN)return;({ins:loadIns,learn:loadProg,proj:loadProj,prof:loadProf})[v]?.()}
+$('th').insertAdjacentHTML('beforebegin',[['prof','Identity'],['learn','Learn'],['intv','Interview'],['proj','Projects'],['ins','Insights']].map(([v,l])=>'<button onclick="show(\''+v+'\')">'+l+'</button>').join(''));
+const busy=(id,t='Thinking…')=>{$(id).innerHTML='<span class="mu">'+t+'</span>'};
+const post=(p,j)=>api(p,{method:'POST',json:j});
+const pre='white-space:pre-wrap';
+function mic(id){const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return alert('Voice input is not supported in this browser');const r=new R();r.lang='en-IN';r.onresult=e=>{$(id).value=e.results[0][0].transcript};r.start()}
+$('q').insertAdjacentHTML('afterend','<button onclick="mic(\'q\')" title="Speak">🎤</button>');$('cin').insertAdjacentHTML('afterend','<button onclick="mic(\'cin\')" title="Speak">🎤</button>');
+
+/* Identity */
+const PF=[['name','Name'],['headline','Headline / role'],['education','Education'],['skills','Skills, programming languages, spoken languages'],['experience','Experience'],['projects','Projects'],['certifications','Certifications'],['achievements','Achievements'],['goals','Goals'],['links','Social / portfolio links'],['style','Preferred communication style'],['instructions','AI instructions']];
+mk('prof','<div class="card"><b>Digital Identity</b><p class="mu">Saved into your knowledge base, so both modes can use it. Leave blank anything you don\'t want stored.</p>'+PF.map(([k,l])=>'<label class="mu">'+l+'</label><textarea id="pf_'+k+'" style="min-height:'+(k==='name'?40:64)+'px"></textarea>').join('')+'<div class="row"><button class="p" onclick="saveProf()">Save identity</button><span class="mu" id="pfm"></span></div></div>');
+async function loadProf(){const d=await api('/profile').catch(()=>({}));PF.forEach(([k])=>$('pf_'+k).value=d[k]||'')}
+async function saveProf(){const d={};PF.forEach(([k])=>d[k]=$('pf_'+k).value.trim());try{await api('/profile',{method:'PUT',json:d});if(d.name){NAME=d.name;sv('dm_name',NAME);render()}$('pfm').textContent='Saved';loadK()}catch(e){$('pfm').textContent=e.message}}
+
+/* Presentation upgrades */
+let AUTO=false,gen=0,H=0,U=0;
+$('slide').insertAdjacentHTML('afterend','<div id="notes" class="mu" style="margin:8px 0;white-space:pre-wrap"></div>');
+$('rate').parentElement.insertAdjacentHTML('afterend','<label class="mu"><input type="checkbox" onchange="AUTO=this.checked" style="width:auto"> Auto-present</label>');
+function say(t){return new Promise(res=>{const av=$('av');av.textContent='😀';const fin=()=>{av.classList.remove('talk');av.textContent='🙂';res()};
+ if(!$('voice').checked||!window.speechSynthesis){av.classList.add('talk');setTimeout(fin,Math.min(9000,t.length*45));return}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=+$('rate').value;u.onstart=()=>av.classList.add('talk');u.onend=u.onerror=fin;speechSynthesis.speak(u)}catch(e){fin()}})}
+async function explain(depth){const s=SL[i];if(!s)return;const my=++gen;$('notes').textContent='Preparing explanation…';let t;
+ try{t=(await post('/presentation/notes',{title:s.t,text:s.x,depth,name:NAME})).answer}catch(e){t=s.t+'. '+s.x}
+ if(my!==gen)return;$('notes').textContent=t;await say(t);
+ if(my===gen&&AUTO&&timer&&!paused&&i<SL.length-1){await new Promise(r=>setTimeout(r,800));if(my===gen&&AUTO)nav(1)}}
+function nav(d){gen++;i=Math.max(0,Math.min(SL.length-1,i+d));done.add(i);render();if(timer&&!paused)explain('normal')}
+function startP(){i=0;done=new Set([0]);sec=0;qn=H=U=0;paused=false;clearInterval(timer);timer=setInterval(()=>{if(!paused){sec++;$('tm').textContent=String(sec/60|0).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}},1000);render();const g=++gen;
+ say('Hello everyone. I am Digital Me'+(NAME?', representing '+NAME:'')+'. Today I will present '+SL[0].t+'.').then(()=>{if(g===gen)explain('normal')})}
+async function endP(){gen++;clearInterval(timer);timer=null;try{speechSynthesis.cancel()}catch(e){}$('av').classList.remove('talk');
+ try{await post('/presentation/end',{topic:SL[0]?.t,seconds:sec,slides:done.size,questions:qn,helpful:H,unhelpful:U})}catch(e){}
+ alert('Presentation ended. Duration '+$('tm').textContent+', slides covered '+done.size+'/'+SL.length+', questions answered '+qn+'.')}
+document.querySelectorAll('#pres .card .row button').forEach(b=>{const t=b.textContent;if(t==='Repeat')b.onclick=()=>explain('normal');if(t==='Explain simply'){b.onclick=()=>explain('simple');b.insertAdjacentHTML('afterend','<button onclick="explain(\'technical\')">Explain technically</button>')}});
+async function ask(){const q=$('q').value.trim();if(!q)return;$('q').value='';let o;try{const d=await post('/presentation/qa',{question:q});o={a:d.answer,c:d.confidence,s:(d.sources||[]).join(', ')||'-'}}catch(e){o={a:'Error: '+e.message,c:'-',s:'-'}}
+ qn++;$('qa').insertAdjacentHTML('afterbegin','<div class="qa"><b>Audience:</b> '+esc(q)+'<br><b>Digital Me:</b> '+esc(o.a)+'<br><span class="mu">Confidence: '+o.c+' · Source: '+esc(o.s)+'</span> <button onclick="H++;this.parentNode.querySelectorAll(\'button\').forEach(b=>b.remove())">👍</button><button onclick="U++;this.parentNode.querySelectorAll(\'button\').forEach(b=>b.remove())">👎</button></div>');render();say(o.a)}
+
+/* Learning */
+mk('learn','<div class="grid g2"><div class="card"><b>Learning assistant</b><div class="row"><input id="ltp" placeholder="Topic, e.g. Digital Logic"><select id="llv" style="width:auto"><option>beginner</option><option>intermediate</option><option>advanced</option></select></div><div class="row"><button class="p" onclick="lGo(\'plan\')">Study plan</button><button onclick="lGo(\'quiz\')">MCQ quiz</button><button onclick="lGo(\'cards\')">Flashcards</button></div><div id="lout" style="'+pre+'"></div></div><div class="card"><b>Progress and weak topics</b><div id="lprog"></div></div></div>');
+let QZ=[],QI=0,QS=0,QT='';
+async function lGo(k){const t=$('ltp').value.trim();if(!t)return;busy('lout');try{
+ if(k==='plan')$('lout').textContent=(await post('/learn/plan',{topic:t,level:$('llv').value})).answer;
+ if(k==='quiz'){QZ=await post('/learn/quiz',{topic:t,difficulty:$('llv').value});QI=QS=0;QT=t;showQ()}
+ if(k==='cards')$('lout').innerHTML=(await post('/learn/cards',{topic:t})).map(x=>'<div class="card" style="margin:6px 0;cursor:pointer" onclick="this.lastChild.style.display=\'block\'"><b>'+esc(x.front)+'</b><div class="mu" style="display:none;margin-top:6px">'+esc(x.back)+'</div></div>').join('')}catch(e){$('lout').textContent=e.message}}
+function showQ(){const o=$('lout');if(QI>=QZ.length){o.innerHTML='<b>Score '+QS+'/'+QZ.length+'</b>';post('/learn/result',{topic:QT,correct:QS,total:QZ.length}).then(loadProg);return}
+ const q=QZ[QI];o.innerHTML='<b>Q'+(QI+1)+'. '+esc(q.q)+'</b>'+q.options.map((x,n)=>'<div><button style="margin:4px 0;width:100%;text-align:left" onclick="pick('+n+')">'+esc(x)+'</button></div>').join('')+'<div id="qw" class="mu"></div>'}
+function pick(n){const q=QZ[QI];if(n===q.answer)QS++;$('qw').innerHTML=(n===q.answer?'✅ Correct. ':'❌ Answer: '+esc(q.options[q.answer])+'. ')+esc(q.why)+' <button class="p" onclick="QI++;showQ()">Next</button>'}
+async function loadProg(){const p=await api('/learn/progress').catch(()=>[]);$('lprog').innerHTML=p.length?p.map(r=>{const pc=Math.round(r.c/r.t*100);return '<div style="margin:8px 0">'+esc(r.topic)+' <b>'+pc+'%</b> '+(pc<60?'⚠️ weak, revise':'')+'<div class="bar"><i style="width:'+pc+'%"></i></div></div>'}).join(''):'<span class="mu">Take a quiz or mock interview to see progress.</span>'}
+
+/* Interview */
+mk('intv','<div class="grid g2"><div class="card"><b>Interview preparation</b><div class="row"><input id="ir" placeholder="Job role"><input id="ic" placeholder="Company"></div><div class="row"><input id="it" placeholder="Technology"><select id="id" style="width:auto"><option>easy</option><option selected>medium</option><option>hard</option></select><select id="ik" style="width:auto"><option>Technical</option><option>HR</option><option>Coding</option><option>Project</option></select></div><button class="p" onclick="iNext()">Next question</button><div id="iq" style="margin:10px 0;font-weight:600"></div><textarea id="ia" placeholder="Type your answer"></textarea><div class="row"><button onclick="mic(\'ia\')">🎤</button><button class="p" onclick="iEval()">Evaluate</button></div></div><div class="card"><b>Evaluation</b><div id="iev" style="'+pre+'"></div></div></div>');
+let ASKED=[];
+async function iNext(){busy('iq');try{const d=await post('/interview/question',{role:$('ir').value,company:$('ic').value,tech:$('it').value,difficulty:$('id').value,kind:$('ik').value,asked:ASKED});ASKED.push(d.question);$('iq').textContent=d.question;$('ia').value='';$('iev').textContent='';say(d.question)}catch(e){$('iq').textContent=e.message}}
+async function iEval(){const a=$('ia').value.trim();if(!a||!ASKED.length)return;busy('iev','Evaluating…');try{const r=await post('/interview/evaluate',{question:ASKED[ASKED.length-1],answer:a,role:$('ir').value,tech:$('it').value});
+ $('iev').innerHTML='<h3 style="margin:0">Score '+r.score+'/10</h3><b>Strengths</b><ul>'+(r.strengths||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><b>Improve</b><ul>'+(r.improvements||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><b>Weak area:</b> '+esc(r.weak_area||'-')+'<br><br><b>Model answer</b><br>'+esc(r.ideal_answer||'')}catch(e){$('iev').textContent=e.message}}
+
+/* Projects */
+const PJ=['description','objective','technologies','architecture','features','tasks','deadline'];let PR=[],CP=null;
+mk('proj','<div class="grid g2"><div class="card"><b>Projects</b><div id="plist" class="row"></div><input id="pj_name" placeholder="Project name">'+PJ.map(k=>'<textarea id="pj_'+k+'" placeholder="'+k+(k==='tasks'?' (one per line; start a line with &quot;x &quot; when done)':'')+'" style="min-height:52px;margin-top:6px"></textarea>').join('')+'<div class="row"><button class="p" onclick="saveP()">Save project</button><button onclick="newP()">New</button><button onclick="delP()">Delete</button></div></div><div class="card"><b>Project assistant</b><div class="row"><button onclick="pAsk(\'What is left in this project?\')">What\'s left?</button><button onclick="pAsk(\'Explain the project architecture.\')">Architecture</button><button onclick="pAsk(\'Find potential problems and risks in this project.\')">Find problems</button><button onclick="mkSlides()">Make slides</button></div><div class="row"><input id="pq" placeholder="Ask about this project"><button class="p" onclick="pAsk($(\'pq\').value)">Ask</button></div><div id="pout" style="'+pre+'"></div></div></div>');
+async function loadProj(){PR=await api('/projects').catch(()=>[]);$('plist').innerHTML=PR.map(p=>'<button onclick="selP('+p.id+')">'+esc(p.name)+'</button>').join('')||'<span class="mu">No projects yet.</span>'}
+function selP(id){const p=PR.find(x=>x.id===id);CP=id;$('pj_name').value=p.name;PJ.forEach(k=>$('pj_'+k).value=p.data[k]||'')}
+function newP(){CP=null;$('pj_name').value='';PJ.forEach(k=>$('pj_'+k).value='')}
+async function saveP(){const name=$('pj_name').value.trim();if(!name)return;const data={};PJ.forEach(k=>data[k]=$('pj_'+k).value.trim());try{CP?await api('/projects/'+CP,{method:'PUT',json:{name,data}}):await post('/projects',{name,data});await loadProj();loadK()}catch(e){alert(e.message)}}
+async function delP(){if(CP&&confirm('Delete this project?')){await api('/projects/'+CP,{method:'DELETE'});newP();loadProj();loadK()}}
+async function pAsk(q){if(!CP)return alert('Select or save a project first');if(!q.trim())return;busy('pout');try{const t=(await post('/projects/'+CP+'/ask',{question:q})).answer;$('pout').textContent=t;return t}catch(e){$('pout').textContent=e.message}}
+async function mkSlides(){const t=await pAsk('Write a 5 to 6 slide presentation using only the project facts. Format: each slide is a block separated by a blank line; first line is the slide title, following lines are the content. No markdown.');if(t){$('deck').value=t;loadDeck();show('pres')}}
+
+/* Insights */
+mk('ins','<div class="grid g2"><div class="card"><b>Presentation analytics</b><div id="ia1"></div></div><div class="card"><b>Learning and interview progress</b><div id="ia2"></div></div></div>');
+async function loadIns(){const d=await api('/analytics').catch(()=>({sessions:[],docs:0}));const s=d.sessions;
+ $('ia1').innerHTML=s.length?s.map(x=>'<div class="qa"><b>'+esc(x.topic||'Presentation')+'</b><br>'+Math.floor(x.seconds/60)+'m '+x.seconds%60+'s · '+x.slides+' slides · '+x.questions+' questions · 👍 '+x.helpful+' 👎 '+x.unhelpful+'<br><span class="mu">'+new Date(x.created_at).toLocaleString()+'</span></div>').join(''):'<span class="mu">No presentations yet.</span>';
+ const p=await api('/learn/progress').catch(()=>[]);$('ia2').innerHTML=p.length?p.map(r=>{const pc=Math.round(r.c/r.t*100);return '<div style="margin:8px 0">'+esc(r.topic)+' <b>'+pc+'%</b> '+(pc<60?'⚠️':'')+'<div class="bar"><i style="width:'+pc+'%"></i></div></div>'}).join(''):'<span class="mu">Nothing yet.</span>'}
+
+
+/* ---- v3: connection status, Google sign-in, settings, chat history, dashboard ---- */
+$('lerr').insertAdjacentHTML('afterend','<div id="gbtn" style="margin-top:10px"></div>');
+$('th').insertAdjacentHTML('beforebegin','<span id="hl" class="mu" title="API status">⚪ API</span><button onclick="show(\'set\')">Settings</button>');
+$('kf').accept='.pdf,.docx,.pptx,.txt,.md,.png,.jpg,.jpeg,.webp';
+LBL.set='Settings';
+async function health(){try{const h=await fetch(API.replace(/\/$/,'')+'/health').then(r=>r.json());const ok=h.db&&h.anthropic&&h.voyage;$('hl').textContent=(ok?'🟢':'🟠')+' API';$('hl').title='DB '+h.db+' · Claude key '+h.anthropic+' · Voyage key '+h.voyage;return h}catch(e){$('hl').textContent='🔴 API';$('hl').title='Cannot reach '+API;return null}}
+async function googleInit(){try{const c=await fetch(API.replace(/\/$/,'')+'/config').then(r=>r.json());if(!c.googleClientId)return;
+ await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+ google.accounts.id.initialize({client_id:c.googleClientId,callback:async r=>{try{const d=await post('/auth/google',{credential:r.credential});TOKEN=d.token;NAME=d.name;sv('dm_tok',TOKEN);sv('dm_name',NAME);$('lg').style.display='none';boot()}catch(e){$('lerr').textContent=e.message}}});
+ google.accounts.id.renderButton($('gbtn'),{theme:'outline',size:'large',width:300})}catch(e){}}
+$('lapi').addEventListener('change',()=>{API=$('lapi').value.trim();sv('dm_api',API);health();googleInit()});
+mk('set','<div class="grid g2"><div class="card"><b>Connection</b><div id="sst" class="mu" style="margin:8px 0"></div><div class="row"><input id="sapi" placeholder="API URL"><button onclick="setApi()">Save</button></div><div class="row"><button onclick="health().then(showSt)">Re-check</button><button onclick="logout()">Log out</button></div></div><div class="card"><b>Your data</b><p class="mu">Everything Digital Me knows about you is stored in your database. You can export or erase it at any time.</p><div class="row"><button onclick="exportData()">Export all data (JSON)</button><button onclick="clearChat()">Clear chat history</button><button onclick="delAll()">Delete all knowledge</button></div></div></div>');
+async function showSt(h){h=h||await health();$('sapi').value=API;$('sst').innerHTML=h?['Database','Claude key','Voyage key','Google sign-in'].map((l,n)=>(Object.values(h)[n]?'🟢 ':'⚪ ')+l).join('<br>')+'<br><span class="mu">'+esc(API)+'</span>':'🔴 Cannot reach '+esc(API)}
+function setApi(){API=$('sapi').value.trim();sv('dm_api',API);showSt()}
+async function exportData(){try{const d=await api('/export');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download='digital-me-export.json';a.click()}catch(e){alert(e.message)}}
+async function clearChat(){if(!confirm('Clear chat history?'))return;await api('/chat/history',{method:'DELETE'});$('chat').innerHTML=''}
+async function loadChat(){const h=await api('/chat/history').catch(()=>[]);$('chat').innerHTML='';h.forEach(m=>addMsg(m.role==='user'?'u':'a',m.content))}
+/* dashboard: quick actions + extra stats */
+$('sD').closest('.grid').insertAdjacentHTML('beforeend','<div class="card stat"><b id="sP">0</b><span class="mu">Projects</span></div><div class="card stat"><b id="sR">0</b><span class="mu">Presentations</span></div>');
+$('sD').closest('.grid').insertAdjacentHTML('afterend','<div class="card" style="margin-top:16px"><b>Quick actions</b><div class="row">'+[['pres','▶ Start presentation'],['comp','💬 Ask Digital Me'],['kb','⬆ Upload knowledge'],['proj','➕ Create project'],['intv','🎯 Practice interview'],['learn','📚 Start learning'],['comp','✅ View tasks']].map(([v,l])=>'<button onclick="show(\''+v+'\')">'+l+'</button>').join('')+'</div></div>');
+async function homeStats(){try{$('sP').textContent=(await api('/projects')).length;const a=await api('/analytics');$('sR').textContent=a.sessions.length}catch(e){}}
+const _show=show;show=function(v){_show(v);if(!TOKEN)return;if(v==='home')homeStats();if(v==='comp')loadChat();if(v==='set')showSt()};
+const _boot=boot;boot=async function(){await _boot();health();homeStats()};
+health();googleInit();if(TOKEN)homeStats();
+
+
+/* ---- v4: sharing, create (resume/pitch/bio/cover), daily plan, rehearsal gaps, reminders ---- */
+LBL.gen='Create';
+$('th').insertAdjacentHTML('beforebegin','<button onclick="show(\'gen\')">Create</button>');
+/* knowledge: per-item sharing toggle */
+async function loadK(){KB=(await api('/knowledge')).map(d=>({id:d.id,c:d.category,t:d.title,x:'',pub:d.public}));renderK();stats()}
+function renderK(){$('kl').innerHTML=KB.map(k=>'<div class="qa"><b>'+esc(k.t)+'</b> <span class="mu">'+esc(k.c)+'</span> <button onclick="togPub('+k.id+','+!k.pub+')" title="Visible on your public link">'+(k.pub?'🌐 Shared':'🔒 Private')+'</button> <button onclick="delK('+k.id+')">Delete</button></div>').join('')}
+async function togPub(id,v){await api('/knowledge/'+id+'/public',{method:'PATCH',json:{public:v}});loadK()}
+/* settings: public link */
+$('set').firstElementChild.insertAdjacentHTML('beforeend','<div class="card"><b>Public Digital Me link</b><p class="mu">Let anyone chat with your Digital Me. It answers only from items marked 🌐 Shared on the Knowledge page.</p><div class="row"><button class="p" onclick="shareSet(true)">Enable link</button><button onclick="shareSet(false)">Disable</button></div><div id="shl" class="mu"></div></div>');
+async function shareSet(on){try{const d=await api('/share',{method:'PUT',json:{enabled:on}});showShare(d.slug)}catch(e){alert(e.message)}}
+function showShare(s){if(!s){$('shl').textContent='Link is off.';return}const u=location.origin+'/p/'+s;$('shl').innerHTML='<a href="'+u+'" target="_blank">'+u+'</a> <button onclick="navigator.clipboard.writeText(\''+u+'\')">Copy</button>'}
+/* create */
+mk('gen','<div class="card"><b>Create from your Digital Identity</b><p class="mu">Built only from your stored knowledge. Missing details appear as [add: ...] placeholders instead of invented facts.</p><div class="row"><select id="gk" style="width:auto"><option value="resume">Resume</option><option value="pitch">Elevator pitch</option><option value="bio">LinkedIn bio</option><option value="cover">Cover letter</option></select><input id="gt" placeholder="Target role or company (optional)"><button class="p" onclick="genGo()">Generate</button></div><div id="gout" style="white-space:pre-wrap;margin-top:10px"></div><div class="row"><button onclick="navigator.clipboard.writeText($(\'gout\').textContent)">Copy</button><button onclick="say($(\'gout\').textContent)">🔊 Read aloud</button></div></div>');
+async function genGo(){busy('gout');try{$('gout').textContent=(await post('/generate',{kind:$('gk').value,target:$('gt').value})).answer}catch(e){$('gout').textContent=e.message}}
+/* companion: plan my day */
+$('cin').parentElement.insertAdjacentHTML('afterend','<div class="row"><button onclick="planDay()">📅 Plan my day</button><button onclick="clearChat()">Clear chat</button></div>');
+async function planDay(){addMsg('u','Plan my day');try{addMsg('a',(await api('/plan/today')).answer)}catch(e){addMsg('a','Error: '+e.message)}}
+/* presentation: rehearsal gap finder */
+$('pres').querySelector('.row').insertAdjacentHTML('beforeend','<button onclick="rehearse()">🧪 Rehearse: find gaps</button>');
+async function rehearse(){$('qa').insertAdjacentHTML('afterbegin','<div class="qa" id="rh">Predicting audience questions…</div>');
+ try{const r=await post('/presentation/prep',{slides:SL});$('rh').innerHTML='<b>Rehearsal</b> ('+r.filter(x=>x.covered).length+'/'+r.length+' covered by your knowledge)<br>'+r.map(x=>(x.covered?'✅ ':'⚠️ ')+esc(x.q)+(x.covered?' <span class="mu">('+esc(x.source)+')</span>':' <span class="mu">add this to your knowledge base</span>')).join('<br>');$('rh').removeAttribute('id')}catch(e){$('rh').textContent=e.message}}
+/* reminders for tasks due today or overdue */
+function remind(){const t=new Date().toISOString().slice(0,10),due=TASKS.filter(x=>!x.d&&x.dl&&x.dl<=t);let el=$('rm');if(!el){$('hl').insertAdjacentHTML('afterend','<span id="rm" class="mu" style="color:#f59e0b"></span>');el=$('rm')}
+ el.textContent=due.length?'⏰ '+due.length+' due':'';if(due.length&&window.Notification&&Notification.permission==='granted'&&!window.__n){window.__n=1;new Notification('Digital Me',{body:due.length+' task(s) due: '+due.map(x=>x.t).join(', ')})}}
+const _lt=loadT;loadT=async function(){await _lt();remind()};
+if(window.Notification&&Notification.permission==='default')document.addEventListener('click',()=>Notification.requestPermission(),{once:true});
+const _s4=show;show=function(v){_s4(v);if(TOKEN&&v==='set')api('/share').then(d=>showShare(d.slug)).catch(()=>{})};
+
+</script></body></html>

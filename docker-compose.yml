@@ -1,0 +1,13 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment: { POSTGRES_USER: dm, POSTGRES_PASSWORD: dm, POSTGRES_DB: digitalme }
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U dm -d digitalme"], interval: 3s, retries: 20 }
+  app:
+    build: .
+    env_file: .env
+    environment: { DATABASE_URL: "postgres://dm:dm@db:5432/digitalme" }
+    ports: ["4000:4000"]
+    depends_on: { db: { condition: service_healthy } }
+volumes: { dbdata: {} }
