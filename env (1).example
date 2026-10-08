@@ -1,0 +1,15 @@
+DATABASE_URL=postgres://user:pass@localhost:5432/digitalme
+JWT_SECRET=change-me-to-a-long-random-string
+PORT=4000
+
+# FREE option (default): get a key at https://aistudio.google.com/apikey
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+
+# Optional paid providers (used instead of Gemini when set)
+ANTHROPIC_API_KEY=
+CLAUDE_MODEL=claude-sonnet-5-5
+VOYAGE_API_KEY=
+
+# Optional: enables "Sign in with Google" (Google Cloud > OAuth client ID, type Web)
+GOOGLE_CLIENT_ID=
