@@ -44,14 +44,27 @@ app.post('/auth/login', async (req, res) => {
 });
 
 // ---------- RAG: extract -> chunk -> embed -> store ----------
+async function gfetch(pathq, body, tries = 5) {            // Google Gemini API (free tier), with backoff on rate limits
+  for (let t = 0; t < tries; t++) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${pathq}`, {
+      method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify(body) });
+    if (r.status === 429 && t < tries - 1) { await new Promise(s => setTimeout(s, 8000 * (t + 1))); continue; }
+    if (!r.ok) throw new Error('Gemini API: ' + await r.text());
+    return r.json();
+  }
+}
 async function embed(texts, type = 'document') {
-  const r = await fetch('https://api.voyageai.com/v1/embeddings', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VOYAGE_API_KEY}` },
-    body: JSON.stringify({ input: texts, model: 'voyage-3.5', input_type: type })
-  });
-  if (!r.ok) throw new Error('Embedding failed: ' + await r.text());
-  return (await r.json()).data.map(d => `[${d.embedding.join(',')}]`);
+  if (process.env.VOYAGE_API_KEY) {
+    const r = await fetch('https://api.voyageai.com/v1/embeddings', {
+      method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.VOYAGE_API_KEY}` },
+      body: JSON.stringify({ input: texts, model: 'voyage-3.5', input_type: type }) });
+    if (!r.ok) throw new Error('Embedding failed: ' + await r.text());
+    return (await r.json()).data.map(d => `[${d.embedding.join(',')}]`);
+  }
+  const d = await gfetch('models/gemini-embedding-001:batchEmbedContents', { requests: texts.map(t => ({
+    model: 'models/gemini-embedding-001', content: { parts: [{ text: t }] },
+    taskType: type === 'query' ? 'RETRIEVAL_QUERY' : 'RETRIEVAL_DOCUMENT', outputDimensionality: 1024 })) });
+  return d.embeddings.map(e => `[${e.values.join(',')}]`);
 }
 function chunk(text, size = 900, overlap = 150) {
   const clean = text.replace(/\s+\n/g, '\n').trim(), out = [];
@@ -106,13 +119,20 @@ app.delete('/me/data', auth, async (req, res) => {           // "allow the user 
 
 // ---------- LLM ----------
 async function claude(system, messages) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-sonnet-5-5', max_tokens: 1000, system, messages })
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return (await r.json()).content.filter(b => b.type === 'text').map(b => b.text).join('');
+  if (process.env.ANTHROPIC_API_KEY) {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-sonnet-5-5', max_tokens: 1000, system, messages }) });
+    if (!r.ok) throw new Error(await r.text());
+    return (await r.json()).content.filter(b => b.type === 'text').map(b => b.text).join('');
+  }
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';     // free-tier default
+  const d = await gfetch(`models/${model}:generateContent`, {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
+    generationConfig: { maxOutputTokens: 2048, ...(model.includes('2.5-flash') ? { thinkingConfig: { thinkingBudget: 0 } } : {}) } });
+  return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
 }
 const ctx = rows => rows.map((r, i) => `[${i + 1}] (${r.title}) ${r.content}`).join('\n\n');
 
@@ -263,7 +283,7 @@ app.post('/projects/:id/ask', auth, wrap(async (req, res) => {
 // ---------- v3: health, config, google sign-in, chat history, export ----------
 app.get('/health', async (req, res) => {
   let dbOk = false; try { await db.query('SELECT 1'); dbOk = true; } catch {}
-  res.json({ db: dbOk, anthropic: !!process.env.ANTHROPIC_API_KEY, voyage: !!process.env.VOYAGE_API_KEY, google: !!process.env.GOOGLE_CLIENT_ID });
+  res.json({ db: dbOk, anthropic: !!(process.env.ANTHROPIC_API_KEY || process.env.GEMINI_API_KEY), voyage: !!(process.env.VOYAGE_API_KEY || process.env.GEMINI_API_KEY), google: !!process.env.GOOGLE_CLIENT_ID });
 });
 app.get('/config', (req, res) => res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null }));
 app.post('/auth/google', wrap(async (req, res) => {
