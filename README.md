@@ -3,7 +3,7 @@
 Node + Express + PostgreSQL/pgvector. Claude for answers, Voyage for embeddings.
 
 ## Quick start (Docker)
-`cp .env.example .env`, add `ANTHROPIC_API_KEY` and `VOYAGE_API_KEY`, then `docker compose up --build` and open http://localhost:4000 (the app and pgvector database start together; tables are created automatically).
+`cp .env.example .env`, add a free `GEMINI_API_KEY` (https://aistudio.google.com/apikey), then `docker compose up --build` and open http://localhost:4000 (the app and pgvector database start together; tables are created automatically).
 
 ## Run without Docker
 1. `cp .env.example .env` and fill in keys; create a Postgres DB with the `vector` extension available.
@@ -32,3 +32,6 @@ Serves the web app from `public/`, auto-migrates the schema on start, `/health`,
 
 ## v4
 Public Digital Me link (`/p/<slug>`, answers only from items marked Shared), `/generate` (resume, pitch, bio, cover letter), `/plan/today`, `/presentation/prep` (rehearsal gap finder), task due reminders. The schema auto-migrates on restart.
+
+## Free APIs
+By default Digital Me uses Google's Gemini API free tier for both answers (`GEMINI_MODEL`, default gemini-2.5-flash) and embeddings (gemini-embedding-001, 1024 dims). Free-tier rate limits apply; the server retries on 429. Set `ANTHROPIC_API_KEY` and/or `VOYAGE_API_KEY` to switch either part to those providers. Use one embedding provider per database: switching later means re-uploading your knowledge.
